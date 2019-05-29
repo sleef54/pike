@@ -1452,11 +1452,12 @@ class Channel(object):
                 extended_attributes,
                 timewarp))
 
-    def close_request(self, handle):
+    def close_request(self, handle, flags):
         smb_req = self.request(obj=handle)
         close_req = smb2.CloseRequest(smb_req)
 
         close_req.file_id = handle.file_id
+        close_req.flags = flags
         close_req.handle = handle
         return close_req
 
@@ -1465,9 +1466,9 @@ class Channel(object):
         resp_future.then(close_req.handle.dispose())
         return resp_future
 
-    def close(self, handle):
+    def close(self, handle, flags = 0):
         return self.close_submit(
-                self.close_request(handle)).result()
+                self.close_request(handle, flags)).result()
 
     def query_directory_request(
             self,
@@ -1483,6 +1484,7 @@ class Channel(object):
         enum_req.file_name = file_name
         enum_req.output_buffer_length = output_buffer_length
         enum_req.file_information_class = file_information_class
+        enum_req.flags = flags
         enum_req.flags = flags
         enum_req.file_index = file_index
         return enum_req
